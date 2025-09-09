@@ -31,16 +31,32 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // If there's no user and the path is not login/auth, redirect to login
   if (
     !user &&
     !request.nextUrl.pathname.startsWith('/login') &&
     !request.nextUrl.pathname.startsWith('/auth')
   ) {
-    // no user, potentially respond by redirecting the user to the login page
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
+    const url = request.nextUrl.clone();
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
   }
 
-  return supabaseResponse
+  // Role-based access control for admin routes
+  if (user && request.nextUrl.pathname.startsWith('/dashboard/admin')) {
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
+
+    if (profileError || profileData?.role !== 'admin') {
+      // Redirect non-admin users from admin pages
+      const url = request.nextUrl.clone();
+      url.pathname = '/dashboard'; // Or a dedicated access denied page
+      return NextResponse.redirect(url);
+    }
+  }
+
+  return supabaseResponse;
 }

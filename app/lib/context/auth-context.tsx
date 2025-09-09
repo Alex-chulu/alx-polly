@@ -17,6 +17,15 @@ const AuthContext = createContext<{
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  /**
+   * `AuthProvider` is a React component that provides authentication context to its children.
+   * It initializes the Supabase client, manages user session and profile data,
+   * and exposes functions for signing out.
+   * The authentication state (session, user, loading status, and signOut function) is made available
+   * to any descendant component that consumes the `AuthContext` via the `useAuth` hook.
+   *
+   * @param children - React nodes to be rendered within the provider's scope.
+   */
   const supabase = useMemo(() => createClient(), []);
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -65,3 +74,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
+/**
+ * `useAuth` is a custom React hook that allows components to access the authentication context.
+ * It provides the current user's session, user object, a signOut function, and a loading state.
+ *
+ * @returns An object containing the current session, user, signOut function, and loading status.
+ */

@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/card";
 import { deletePoll } from "@/app/lib/actions/poll-actions";
 import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/app/lib/context/auth-context"; // Import useAuth
+import { redirect } from "next/navigation"; // Import redirect
 
 interface Poll {
   id: string;
@@ -21,13 +23,37 @@ interface Poll {
 }
 
 export default function AdminPage() {
+  /**
+   * `AdminPage` is a React functional component that serves as an administrative panel
+   * for viewing and managing all polls in the system. It fetches all polls from the database
+   * and provides functionality to delete individual polls.
+   *
+   * State management:
+   * - `polls`: Stores the list of all poll objects fetched from the database.
+   * - `loading`: A boolean indicating whether the polls are currently being loaded.
+   * - `deleteLoading`: Stores the ID of the poll currently being deleted to manage loading states for individual delete buttons.
+   */
   const [polls, setPolls] = useState<Poll[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const { user, loading: authLoading } = useAuth(); // Use the auth context
 
   useEffect(() => {
-    fetchAllPolls();
-  }, []);
+    /**
+     * Fetches all polls from the Supabase database.
+     * Populates the `polls` state with the retrieved data and sets `loading` to `false` once done.
+     * Handles potential errors during data fetching by logging them to the console.
+     */
+    if (!authLoading) {
+      // Wait for auth context to load
+      if (!user || user.user_metadata.role !== 'admin') {
+        // If user is not an admin, redirect them
+        redirect('/dashboard');
+      } else {
+        fetchAllPolls();
+      }
+    }
+  }, [user, authLoading]); // Re-run effect when user or authLoading changes
 
   const fetchAllPolls = async () => {
     const supabase = createClient();
@@ -44,6 +70,14 @@ export default function AdminPage() {
   };
 
   const handleDelete = async (pollId: string) => {
+    /**
+     * Handles the deletion of a specific poll.
+     * Sets `deleteLoading` to the `pollId` to indicate that a deletion operation is in progress for that poll.
+     * Calls the `deletePoll` action to remove the poll from the database.
+     * If the deletion is successful, it updates the `polls` state to reflect the removal of the deleted poll.
+     *
+     * @param pollId - The ID of the poll to be deleted.
+     */
     setDeleteLoading(pollId);
     const result = await deletePoll(pollId);
 
@@ -54,7 +88,8 @@ export default function AdminPage() {
     setDeleteLoading(null);
   };
 
-  if (loading) {
+  if (loading || authLoading) {
+    // Show loading indicator while authentication status is being determined or polls are loading
     return <div className="p-6">Loading all polls...</div>;
   }
 

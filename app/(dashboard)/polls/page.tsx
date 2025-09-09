@@ -4,6 +4,13 @@ import { getUserPolls } from '@/app/lib/actions/poll-actions';
 import PollActions from './PollActions'; 
 
 export default async function PollsPage() {
+  /**
+   * `PollsPage` is an asynchronous React functional component responsible for displaying
+   * a user's created polls. It fetches polls associated with the current user
+   * using `getUserPolls` and renders them as `PollActions` components.
+   * It also provides a link to create new polls and handles the display of any errors
+   * that occur during the fetching process.
+   */
   const { polls, error } = await getUserPolls();
 
   return (

@@ -23,6 +23,21 @@ const mockPoll = {
 };
 
 export default function PollDetailPage({ params }: { params: { id: string } }) {
+  /**
+   * `PollDetailPage` is a React functional component that displays the details of a single poll.
+   * It allows users to view the poll question and options, submit their vote, and see the results
+   * and vote distribution after voting. It also provides options to edit or delete the poll for authorized users.
+   *
+   * @param params - An object containing route parameters, specifically `id` for the poll ID.
+   *
+   * State management:
+   * - `selectedOption`: Stores the ID of the option currently selected by the user for voting.
+   * - `hasVoted`: A boolean indicating whether the user has already voted on this poll.
+   * - `isSubmitting`: A boolean indicating whether a vote is currently being submitted.
+   *
+   * Mock data is currently used (`mockPoll`). In a real application, this data would be fetched
+   * from a backend API based on the `params.id`.
+   */
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,6 +47,14 @@ export default function PollDetailPage({ params }: { params: { id: string } }) {
   const totalVotes = poll.options.reduce((sum, option) => sum + option.votes, 0);
 
   const handleVote = () => {
+    /**
+     * Handles the submission of a user's vote.
+     * Prevents voting if no option is selected.
+     * Sets `isSubmitting` to `true` to indicate the start of the submission process.
+     * Simulates an API call with a 1-second delay using `setTimeout`.
+     * After the simulated submission, sets `hasVoted` to `true` to display results
+     * and `isSubmitting` back to `false`.
+     */
     if (!selectedOption) return;
     
     setIsSubmitting(true);
@@ -44,6 +67,13 @@ export default function PollDetailPage({ params }: { params: { id: string } }) {
   };
 
   const getPercentage = (votes: number) => {
+    /**
+     * Calculates the percentage of votes for a given option.
+     *
+     * @param votes - The number of votes for a specific option.
+     * @returns The percentage of votes (rounded to the nearest whole number) for the option.
+     *          Returns 0 if `totalVotes` is 0 to prevent division by zero.
+     */
     if (totalVotes === 0) return 0;
     return Math.round((votes / totalVotes) * 100);
   };
